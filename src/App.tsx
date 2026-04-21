@@ -14,10 +14,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {/* Toast */}
         <Toaster />
 
-        {/* Routes */}
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
