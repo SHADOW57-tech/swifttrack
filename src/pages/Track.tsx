@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   MapPin,
