@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  Bell,
   Plus,
   Edit2,
   Trash2,
   ExternalLink,
   Package,
   Search,
+  Shield,
   X,
 } from "lucide-react";
-import { Header } from "@/components/Header";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   useShipmentStore,
@@ -21,9 +22,17 @@ import {
   STATUS_OPTIONS,
 } from "@/data/mockShipments";
 import { ShipmentEditor } from "@/components/admin/ShipmentEditor";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { useAdminSession } from "@/components/admin/AdminSessionProvider";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { toast } from "@/hooks/use-toast";
 
 const Admin = () => {
+  const { signOut } = useAdminSession();
   const shipments = useShipmentStore((s) => s.shipments);
   const addShipment = useShipmentStore((s) => s.addShipment);
   const deleteShipment = useShipmentStore((s) => s.deleteShipment);
@@ -85,119 +94,156 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+    <SidebarProvider defaultOpen>
+      <AdminSidebar
+        shipmentCount={shipments.length}
+        onCreateShipment={() => setCreating(true)}
+        onSignOut={signOut}
+      />
 
-      <main className="container py-6 sm:py-10 flex-1">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Admin Panel
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Manage tracking numbers, statuses, and timeline events.
-            </p>
-          </div>
-          <button
-            onClick={() => setCreating(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-card"
-          >
-            <Plus className="h-4 w-4" />
-            Create Tracking
-          </button>
-        </div>
+      <SidebarInset>
+        <div className="flex min-h-screen flex-col bg-background">
+          <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+            <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
+              <div className="flex items-center gap-3">
+                <SidebarTrigger className="h-9 w-9 rounded-md border border-border" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Admin console
+                  </p>
+                  <h1 className="text-lg font-bold text-foreground sm:text-xl">
+                    Shipment operations
+                  </h1>
+                </div>
+              </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <StatCard label="Total" value={shipments.length} />
-          <StatCard
-            label="In Transit"
-            value={shipments.filter((s) => s.status === "In Transit").length}
-          />
-          <StatCard
-            label="Delivered"
-            value={shipments.filter((s) => s.status === "Delivered").length}
-          />
-          <StatCard
-            label="Issues"
-            value={
-              shipments.filter((s) =>
-                ["On Hold", "Delayed"].includes(s.status)
-              ).length
-            }
-          />
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search shipments..."
-            className="w-full bg-white pl-10 pr-3 py-2.5 rounded-md border border-input bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
-
-        {/* List */}
-        <div className="bg-card border border-border rounded-xl shadow-card overflow-hidden">
-          {filtered.length === 0 ? (
-            <div className="p-10 text-center">
-              <Package className="mx-auto h-10 w-10 text-muted-foreground" />
-              <p className="mt-3 text-muted-foreground">No shipments found.</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-border bg-white">
-              {filtered.map((s) => (
-                <li
-                  key={s.trackingNumber}
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="hidden items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm text-muted-foreground shadow-card sm:flex">
+                  <Shield className="h-4 w-4 text-primary" />
+                  Admin session active
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label="Notifications"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-mono font-bold text-foreground">
-                        {s.trackingNumber}
-                      </span>
-                      <StatusBadge status={s.status} size="sm" />
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {s.origin} → {s.destination} · {s.recipientName || "—"}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Link
-                      to={`/track/${s.trackingNumber}`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                  <Bell className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
+            <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl">
+                  <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+                    Monitor live shipments and update customer-visible milestones.
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                    Keep tracking records organized, review delivery progress, and make quick updates from one clean workspace.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCreating(true)}
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover shadow-card"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Tracking
+                </button>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
+                <StatCard label="Total" value={shipments.length} />
+                <StatCard
+                  label="In Transit"
+                  value={shipments.filter((s) => s.status === "In Transit").length}
+                />
+                <StatCard
+                  label="Delivered"
+                  value={shipments.filter((s) => s.status === "Delivered").length}
+                />
+                <StatCard
+                  label="Issues"
+                  value={
+                    shipments.filter((s) => ["On Hold", "Delayed"].includes(s.status)).length
+                  }
+                />
+              </div>
+            </section>
+
+            <section className="mt-6 rounded-lg border border-border bg-card shadow-card overflow-hidden">
+              <div className="border-b border-border p-4 sm:p-5">
+                <div className="relative max-w-xl">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by tracking number, recipient, origin, or destination"
+                    className="w-full rounded-md border border-input bg-background py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              {filtered.length === 0 ? (
+                <div className="p-10 text-center">
+                  <Package className="mx-auto h-10 w-10 text-muted-foreground" />
+                  <p className="mt-3 text-muted-foreground">No shipments found.</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {filtered.map((s) => (
+                    <li
+                      key={s.trackingNumber}
+                      className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5"
                     >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      View
-                    </Link>
-                    <button
-                      onClick={() => setEditing(s)}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm(`Delete shipment ${s.trackingNumber}?`)) {
-                          deleteShipment(s.trackingNumber);
-                          toast({ title: "Shipment deleted" });
-                        }
-                      }}
-                      className="inline-flex items-center justify-center rounded-md border border-border bg-background p-1.5 text-status-danger hover:bg-status-danger/10 transition-colors"
-                      aria-label="Delete"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="font-mono font-bold text-foreground">
+                            {s.trackingNumber}
+                          </span>
+                          <StatusBadge status={s.status} size="sm" />
+                        </div>
+                        <div className="mt-1 text-sm text-muted-foreground">
+                          {s.origin} → {s.destination} · {s.recipientName || "—"}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          to={`/track/${s.trackingNumber}`}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          View
+                        </Link>
+                        <button
+                          onClick={() => setEditing(s)}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Delete shipment ${s.trackingNumber}?`)) {
+                              deleteShipment(s.trackingNumber);
+                              toast({ title: "Shipment deleted" });
+                            }
+                          }}
+                          className="inline-flex items-center justify-center rounded-md border border-border bg-background p-1.5 text-status-danger transition-colors hover:bg-status-danger/10"
+                          aria-label="Delete"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </main>
         </div>
-      </main>
+      </SidebarInset>
 
       {/* Create modal */}
       {creating && (
@@ -335,13 +381,13 @@ const Admin = () => {
           />
         </Modal>
       )}
-    </div>
+    </SidebarProvider>
   );
 };
 
 const StatCard = ({ label, value }: { label: string; value: number }) => (
-  <div className="bg-card bg-white border border-border rounded-lg p-4 shadow-card">
-    <div className="text-xs uppercase tracking-wide text-muted-foreground">
+  <div className="rounded-lg border border-border bg-background p-4 shadow-card">
+    <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
       {label}
     </div>
     <div className="text-2xl font-bold text-foreground mt-1">{value}</div>
@@ -373,14 +419,14 @@ const Modal = ({
   children: React.ReactNode;
 }) => (
   <div
-    className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    className="fixed  inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     onClick={onClose}
   >
     <div
       className="bg-card w-full sm:max-w-2xl rounded-t-xl sm:rounded-xl shadow-elevated max-h-[90vh] overflow-y-auto"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
+      <div className="sticky bg-white top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
         <h3 className="font-bold text-foreground">{title}</h3>
         <button
           onClick={onClose}

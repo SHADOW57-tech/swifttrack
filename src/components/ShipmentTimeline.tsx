@@ -18,8 +18,9 @@ const formatDate = (iso: string) => {
 };
 
 export const ShipmentTimeline = ({ events }: ShipmentTimelineProps) => {
+  // Newest first
   const sorted = [...events].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   return (
@@ -29,6 +30,7 @@ export const ShipmentTimeline = ({ events }: ShipmentTimelineProps) => {
         const isAlert = event.isAlert;
         return (
           <li key={event.id} className="flex gap-4 pb-8 last:pb-0 relative">
+            {/* Vertical connector line */}
             {idx < sorted.length - 1 && (
               <span
                 className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-border"
@@ -44,8 +46,8 @@ export const ShipmentTimeline = ({ events }: ShipmentTimelineProps) => {
                   isAlert
                     ? "bg-status-danger border-status-danger text-white"
                     : isLatest
-                    ? "bg-primary border-primary text-primary-foreground"
-                    : "bg-status-success border-status-success text-white"
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-status-success border-status-success text-white",
                 )}
               >
                 {isAlert ? (
@@ -64,7 +66,7 @@ export const ShipmentTimeline = ({ events }: ShipmentTimelineProps) => {
                 <h4
                   className={cn(
                     "font-semibold",
-                    isAlert ? "text-status-danger" : "text-foreground"
+                    isAlert ? "text-status-danger" : "text-foreground",
                   )}
                 >
                   {event.status}

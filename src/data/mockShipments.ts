@@ -149,6 +149,6 @@ export const mockShipments: Shipment[] = [
   },
 ];
 
-
-export const WHATSAPP_NUMBER = "+2349038642833";
-export const SUPPORT_EMAIL = "lightlucky775@gmail.com";
+// WhatsApp placeholder — replace with real number (international format, no +)
+export const WHATSAPP_NUMBER = "1234567890";
+export const SUPPORT_EMAIL = "support@example.com";

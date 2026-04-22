@@ -1,12 +1,12 @@
 import { SUPPORT_EMAIL } from "@/data/mockShipments";
 import { Mail, Phone } from "lucide-react";
 
-const WHATSAPP_NUMBER = "+2349038642833";
+const WHATSAPP_NUMBER = "2349038642833";
 
 export const Footer = () => {
   return (
     <footer className="border-t border-border bg-card mt-16">
-      <div className="container py-10 grid gap-8 md:grid-cols-3 text-sm">
+      <div className="w-full  mx-auto px-4 sm:px-6 lg:px-8 items-center justify-between">
 
         {/* Brand */}
         <div>

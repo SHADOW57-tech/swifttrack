@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, type FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import {
   ArrowLeft,
   MapPin,
@@ -46,7 +46,7 @@ const Track = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="container py-6 sm:py-10 flex-1">
+      <main className=" py-6 sm:py-10 flex-1">
         {/* Search bar */}
         <div className="mb-6">
           <Link
